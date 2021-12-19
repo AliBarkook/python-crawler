@@ -8,4 +8,14 @@ class Course():
         self.courseLink = courseLink
         self.coursePrice = coursePrice
         self.courseSessionCountOrTime = courseSessionCountOrTime
+
+    def getCourseList(self):
+        proplist = []
+        proplist.append(self.courseName)
+        proplist.append(self.teacherName)
+        proplist.append(self.instituteName)
+        proplist.append(self.coursePrice)
+        proplist.append(self.courseSessionCountOrTime)
+        proplist.append(self.courseLink)
+        return proplist
     
