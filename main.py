@@ -9,21 +9,21 @@ from bs4 import BeautifulSoup
 from classes.course import CourseClass
 # ? excel class
 from classes.excel import ExcelClass
+# ? excel class
+from environment.environment import EnvironmentClass
 
-courseListUrl = 'https://maktabkhooneh.org/learn'
-siteUrl = 'https://maktabkhooneh.org'
-studentNumber = '98521081'
-coursePropTitleList = ['عنوان دوره', 'نام استاد', 'نام موسسه', 'هزینه دوره', 'تعداد جلسه و ساعات', 'لینک']
+env = EnvironmentClass()
 
-
-excel = ExcelClass('maktabkhooneh_' + studentNumber + '.xlsx', 'maktabkhoone_course_list', coursePropTitleList)
-
-
+excel = ExcelClass('maktabkhooneh_' + env.studentNumber + '.xlsx', 'maktabkhoone_course_list', env.coursePropTitleList)
 
 # ? get courses info
-def getCouresesInformation(couresLinkList):
+def getCouresesInformation():
+    couresLinkList = []
+    with open('courses-link.txt') as f:
+        for line in f:
+            couresLinkList.append(line.strip())
     
-    row = 0
+    row = 1
     for link in couresLinkList:
         try:
 
@@ -47,13 +47,14 @@ def getCouresesInformation(couresLinkList):
                 price = 'رایگان'
 
 
-            course = CourseClass(title, teacher, intitute, siteUrl + link, price, session)
+            course = CourseClass(title, teacher, intitute, env.siteUrl + link, price, session)
             excel.storeDataInExcel(row, 0, course)
             row += 1
 
         except:
             print('can`t get course number ' + str(couresLinkList.index(link)+1))
             continue
+
 
     excel.closeExcel()
    
@@ -68,25 +69,24 @@ def loopOverPages(totalPage):
     for page in range(totalPage):
         print('getting page number ' + str(page+1))
 
-        pageResponse = requests.get(courseListUrl + '/?p=' + str(page+1) + '&')
+        pageResponse = requests.get(env.courseListUrl + '/?p=' + str(page+1) + '&')
         pageHtml = BeautifulSoup(pageResponse.content, 'html.parser')
         allCourseLink = pageHtml.find_all('a', class_='course-card__wrapper')
         for link in allCourseLink:
-            link = siteUrl + link.get_attribute_list('href')[0]
+            link = env.siteUrl + link.get_attribute_list('href')[0]
             couresLinkList.append(link)
             with open('courses-link.txt', 'a') as f:
                 f.write(link + '\n')
 
 
     print('total course link count is', len(couresLinkList))
-
-    getCouresesInformation(couresLinkList)
+    
 
 # ? request to site and store total course page
 def getTotalPage():
     try:
         print('getting total page ...')
-        response = requests.get(courseListUrl)
+        response = requests.get(env.courseListUrl)
         html = BeautifulSoup(response.content, 'html.parser')
 
         totalPage = html.find_all('a', class_='paginator__link')[-1].text
@@ -106,4 +106,8 @@ def getTotalPage():
         print('Success!')
     
 excel.initExcel()
-getTotalPage()
+
+if not(env.link_crawled_sitch):
+    getTotalPage()
+
+getCouresesInformation()
