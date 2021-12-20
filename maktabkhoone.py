@@ -5,34 +5,27 @@ from requests.exceptions import HTTPError
 # ? Beautiful soup module for pars html
 from bs4 import BeautifulSoup
 
-# ? excel module
-import xlsxwriter 
+
 
 # ? course class
-from course import Course
+from course import CourseClass
+# ? excel class
+from excel import ExcelClass
 
 courseListUrl = 'https://maktabkhooneh.org/learn'
 siteUrl = 'https://maktabkhooneh.org'
 studentNumber = '98521081'
 coursePropTitleList = ['عنوان دوره', 'نام استاد', 'نام موسسه', 'هزینه دوره', 'تعداد جلسه و ساعات', 'لینک']
 
+
+excel = ExcelClass('maktabkhooneh_' + studentNumber + '.xlsx', 'maktabkhoone_course_list', coursePropTitleList)
+
+
+
 # ? get courses info
 def getCouresesInformation(couresLinkList):
     
-    # totalCourse = []
-
-    excelFile = xlsxwriter.Workbook('maktabkhooneh_' + studentNumber + '.xlsx')
-    worksheet = excelFile.add_worksheet()
-
-    # ? write excel title
     row = 0
-    col = 0
-    for title in coursePropTitleList:
-
-        worksheet.write(row, col, title)
-        col += 1
-
-    row += 1
     for link in couresLinkList:
         try:
 
@@ -56,30 +49,16 @@ def getCouresesInformation(couresLinkList):
                 price = 'رایگان'
 
 
-            course = Course(title, teacher, intitute, siteUrl + link, price, session)
-            # totalCourse.append(course)
-
-            
-            col = 0
-            for prop in course.getCourseList():
-
-                worksheet.write(row, col, prop)
-                col += 1
+            course = CourseClass(title, teacher, intitute, siteUrl + link, price, session)
+            excel.storeDataInExcel(row, 0, course)
             row += 1
 
         except:
             print('can`t get course number ' + str(couresLinkList.index(link)+1))
             continue
 
-    excelFile.close()
-
-        
-
- 
-
-
-
-
+    excel.closeExcel()
+   
 
 # ? loop over pages and get courses page link
 def loopOverPages(totalPage):
@@ -87,15 +66,16 @@ def loopOverPages(totalPage):
     couresLinkList = []
 
     
-    for page in range(10):
+    for page in range(2):
         print('getting page number ' + str(page+1))
+
         pageResponse = requests.get(courseListUrl + '/?p=' + str(page+1) + '&')
         pageHtml = BeautifulSoup(pageResponse.content, 'html.parser')
         allCourseLink = pageHtml.find_all('a', class_='course-card__wrapper')
         for link in allCourseLink:
             couresLinkList.append(link.get_attribute_list('href')[0])
 
-    print('total link count is', len(couresLinkList))
+    print('total course link count is', len(couresLinkList))
 
     getCouresesInformation(couresLinkList)
 
@@ -122,5 +102,5 @@ def getTotalPage():
     else:
         print('Success!')
     
-
+excel.initExcel()
 getTotalPage()

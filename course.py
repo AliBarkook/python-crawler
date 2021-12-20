@@ -1,5 +1,5 @@
 # ? course class
-class Course():
+class CourseClass():
 
     def __init__(self, courseName, teacherName, instituteName, courseLink, coursePrice, courseSessionCountOrTime):
 
