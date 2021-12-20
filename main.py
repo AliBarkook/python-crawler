@@ -2,6 +2,8 @@
 import requests
 from requests.exceptions import HTTPError
 
+import threading
+
 # ? Beautiful soup module for pars html
 from bs4 import BeautifulSoup
 
@@ -12,9 +14,51 @@ from classes.excel import ExcelClass
 # ? excel class
 from environment.environment import EnvironmentClass
 
+
 env = EnvironmentClass()
 
-excel = ExcelClass('maktabkhooneh_' + env.studentNumber + '2.xlsx', 'maktabkhoone_course_list', env.coursePropTitleList)
+excel = ExcelClass('maktabkhooneh_' + env.studentNumber + '-3.xlsx', 'maktabkhoone_course_list', env.coursePropTitleList)
+
+class myThread (threading.Thread):
+   def __init__(self, row, link):
+      threading.Thread.__init__(self)
+      self.row = row
+      self.link = link
+   def run(self):
+      print ("Starting thread number " + str(self.row))
+      requestAndBeautiful(self.link, int(self.row))
+
+def requestAndBeautiful(link, index):
+    try:
+
+        print('getting course number ' + str(index) + '\n')
+
+        courseResponse = requests.get(link)
+        courseHtml = BeautifulSoup(courseResponse.text, 'html.parser')
+
+        
+        # ? fill neccessary data from DOM
+        title = courseHtml.title.get_text()
+        teacher = courseHtml.find_all(class_='teacher-card__image')[0]["title"]
+        intitute = courseHtml.find_all(class_='teacher-card__image')[1]["title"]
+        session = courseHtml.find(class_="chapter__clock-text").get_text()
+        price = ''
+
+        # ? check price
+        if courseHtml.find(class_="fl2"):
+            price = courseHtml.find(class_="fl2").get_text()
+        else:
+            price = 'رایگان'
+
+
+        course = CourseClass(title, teacher, intitute, link, price, session)
+        excel.storeDataInExcel(index, 0, course)
+
+        return
+    except:
+        print('can`t get course number ' + str(index))
+        return
+
 
 # ? get courses info
 def getCouresesInformation():
@@ -25,36 +69,12 @@ def getCouresesInformation():
     
     row = 1
     for link in couresLinkList:
+        row += 1
         try:
-
-            print('getting course number ' + str(couresLinkList.index(link)+1))
-
-            courseResponse = requests.get(link)
-            courseHtml = BeautifulSoup(courseResponse.text, 'html.parser')
-
-            
-            # ? fill neccessary data from DOM
-            title = courseHtml.title.get_text()
-            teacher = courseHtml.find_all(class_='teacher-card__image')[0]["title"]
-            intitute = courseHtml.find_all(class_='teacher-card__image')[1]["title"]
-            session = courseHtml.find(class_="chapter__clock-text").get_text()
-            price = ''
-
-            # ? check price
-            if courseHtml.find(class_="fl2"):
-                price = courseHtml.find(class_="fl2").get_text()
-            else:
-                price = 'رایگان'
-
-
-            course = CourseClass(title, teacher, intitute, env.siteUrl + link, price, session)
-            excel.storeDataInExcel(row, 0, course)
-            row += 1
-
+            thread1 = myThread(row, link)
+            thread1.start()
         except:
-            print('can`t get course number ' + str(couresLinkList.index(link)+1))
-            continue
-
+            print ("Error: unable to start thread")
 
     excel.closeExcel()
    
