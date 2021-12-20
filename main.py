@@ -5,12 +5,10 @@ from requests.exceptions import HTTPError
 # ? Beautiful soup module for pars html
 from bs4 import BeautifulSoup
 
-
-
 # ? course class
-from course import CourseClass
+from classes.course import CourseClass
 # ? excel class
-from excel import ExcelClass
+from classes.excel import ExcelClass
 
 courseListUrl = 'https://maktabkhooneh.org/learn'
 siteUrl = 'https://maktabkhooneh.org'
@@ -66,7 +64,7 @@ def loopOverPages(totalPage):
     couresLinkList = []
 
     
-    for page in range(2):
+    for page in range(1):
         print('getting page number ' + str(page+1))
 
         pageResponse = requests.get(courseListUrl + '/?p=' + str(page+1) + '&')
