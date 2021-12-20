@@ -14,7 +14,7 @@ from environment.environment import EnvironmentClass
 
 env = EnvironmentClass()
 
-excel = ExcelClass('maktabkhooneh_' + env.studentNumber + '.xlsx', 'maktabkhoone_course_list', env.coursePropTitleList)
+excel = ExcelClass('maktabkhooneh_' + env.studentNumber + '2.xlsx', 'maktabkhoone_course_list', env.coursePropTitleList)
 
 # ? get courses info
 def getCouresesInformation():
