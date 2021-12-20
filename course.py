@@ -1,3 +1,4 @@
+# ? course class
 class Course():
 
     def __init__(self, courseName, teacherName, instituteName, courseLink, coursePrice, courseSessionCountOrTime):

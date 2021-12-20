@@ -1,8 +1,14 @@
+# ? request module for http request
 import requests
 from requests.exceptions import HTTPError
-from bs4 import BeautifulSoup
-import xlsxwriter
 
+# ? Beautiful soup module for pars html
+from bs4 import BeautifulSoup
+
+# ? excel module
+import xlsxwriter 
+
+# ? course class
 from course import Course
 
 courseListUrl = 'https://maktabkhooneh.org/learn'
@@ -12,9 +18,10 @@ coursePropTitleList = ['عنوان دوره', 'نام استاد', 'نام مو�
 
 # ? get courses info
 def getCouresesInformation(couresLinkList):
-    totalCourse = []
+    
+    # totalCourse = []
 
-    excelFile = xlsxwriter.Workbook('Example2.xlsx')
+    excelFile = xlsxwriter.Workbook('maktabkhooneh_' + studentNumber + '.xlsx')
     worksheet = excelFile.add_worksheet()
 
     # ? write excel title
@@ -27,45 +34,47 @@ def getCouresesInformation(couresLinkList):
 
     row += 1
     for link in couresLinkList:
-        print('getting course number ' + str(couresLinkList.index(link)+1))
-        courseResponse = requests.get(siteUrl + link)
-        courseHtml = BeautifulSoup(courseResponse.text, 'html.parser')
+        try:
 
-        
-        title = courseHtml.title.get_text()
-        teacher = courseHtml.find_all(class_='teacher-card__image')[0]["title"]
-        intitute = courseHtml.find_all(class_='teacher-card__image')[1]["title"]
-        session = courseHtml.find(class_="chapter__clock-text").get_text()
-        price = ''
+            print('getting course number ' + str(couresLinkList.index(link)+1))
 
-        # ? check price
-        if courseHtml.find(class_="fl2"):
-            price = courseHtml.find(class_="fl2").get_text()
-        else:
-            price = 'رایگان'
+            courseResponse = requests.get(siteUrl + link)
+            courseHtml = BeautifulSoup(courseResponse.text, 'html.parser')
+
+            
+            # ? fill neccessary data from DOM
+            title = courseHtml.title.get_text()
+            teacher = courseHtml.find_all(class_='teacher-card__image')[0]["title"]
+            intitute = courseHtml.find_all(class_='teacher-card__image')[1]["title"]
+            session = courseHtml.find(class_="chapter__clock-text").get_text()
+            price = ''
+
+            # ? check price
+            if courseHtml.find(class_="fl2"):
+                price = courseHtml.find(class_="fl2").get_text()
+            else:
+                price = 'رایگان'
 
 
-        course = Course(title, teacher, intitute, siteUrl + link, price, session)
-        totalCourse.append(course)
+            course = Course(title, teacher, intitute, siteUrl + link, price, session)
+            # totalCourse.append(course)
 
+            
+            col = 0
+            for prop in course.getCourseList():
 
-        
-        
-        col = 0
-        for prop in course.getCourseList():
+                worksheet.write(row, col, prop)
+                col += 1
+            row += 1
 
-            worksheet.write(row, col, prop)
-            col += 1
-        row += 1
-
-        
+        except:
+            print('can`t get course number ' + str(couresLinkList.index(link)+1))
+            continue
 
     excelFile.close()
-    
 
-    # Html_file= open("htmlDom2.txt","w", encoding="utf8")
-    # Html_file.write(str(courseHtml.prettify()))
-    # Html_file.close()
+        
+
  
 
 
@@ -78,7 +87,8 @@ def loopOverPages(totalPage):
     couresLinkList = []
 
     
-    for page in range(1):
+    for page in range(10):
+        print('getting page number ' + str(page+1))
         pageResponse = requests.get(courseListUrl + '/?p=' + str(page+1) + '&')
         pageHtml = BeautifulSoup(pageResponse.content, 'html.parser')
         allCourseLink = pageHtml.find_all('a', class_='course-card__wrapper')
@@ -98,7 +108,9 @@ def getTotalPage():
 
         totalPage = html.find_all('a', class_='paginator__link')[-1].text
 
-        loopOverPages(totalPage)
+        print('total page is', totalPage)
+
+        loopOverPages(int(totalPage))
 
         
         
