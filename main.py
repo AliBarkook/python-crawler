@@ -29,7 +29,7 @@ def getCouresesInformation(couresLinkList):
 
             print('getting course number ' + str(couresLinkList.index(link)+1))
 
-            courseResponse = requests.get(siteUrl + link)
+            courseResponse = requests.get(link)
             courseHtml = BeautifulSoup(courseResponse.text, 'html.parser')
 
             
@@ -62,16 +62,21 @@ def getCouresesInformation(couresLinkList):
 def loopOverPages(totalPage):
     print('getting coureses link ...')
     couresLinkList = []
+    open('courses-link.txt', 'w').close()
 
     
-    for page in range(1):
+    for page in range(totalPage):
         print('getting page number ' + str(page+1))
 
         pageResponse = requests.get(courseListUrl + '/?p=' + str(page+1) + '&')
         pageHtml = BeautifulSoup(pageResponse.content, 'html.parser')
         allCourseLink = pageHtml.find_all('a', class_='course-card__wrapper')
         for link in allCourseLink:
-            couresLinkList.append(link.get_attribute_list('href')[0])
+            link = siteUrl + link.get_attribute_list('href')[0]
+            couresLinkList.append(link)
+            with open('courses-link.txt', 'a') as f:
+                f.write(link + '\n')
+
 
     print('total course link count is', len(couresLinkList))
 
