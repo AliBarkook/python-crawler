@@ -203,10 +203,18 @@ def getTotalPage():
 # ? create excel file and worksheet
 excel.initExcel()
 
-if env.course_link_switch:
-    getTotalPage()
-elif env.course_info_switch:
-    getCouresesInformation()
+if env.multithead_switch:
+    if env.course_link_switch:
+        getTotalPage()
+    elif env.course_info_switch:
+        getCouresesInformation()
 
 
-interval()
+    interval()
+
+else:
+    if env.course_link_switch:
+        getTotalPage()
+    if env.course_info_switch:
+        getCouresesInformation()
+    excel.closeExcel()
