@@ -1,4 +1,22 @@
 class EnvironmentClass:
+
+    """
+
+    |--------------------------------------------------------------------------------------------
+    |                                                                                           |
+    |     environment Class                                                                     |
+    |                                                                                           |
+    |--------------------------------------------------------------------------------------------
+    |                                                                                           |
+    |   1 - initial Class                                                                       |
+    |       store cours list url, site url, student number excel property list,                 |                        |
+    |       switch for course link request functionality and course info request functionality  |                                         |
+    |       switch for multiple threading functionality                                         |
+    |                                                                                           |
+    ---------------------------------------------------------------------------------------------
+
+    """
+    # ? -> 1
     def __init__(self):
         
         self.courseListUrl = 'https://maktabkhooneh.org/learn'

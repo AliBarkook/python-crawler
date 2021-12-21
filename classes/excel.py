@@ -1,7 +1,29 @@
-# ? excel module
+
+# ? import excel module
 import xlsxwriter 
 
 class ExcelClass:
+
+    """
+
+    |---------------------------------------------------------------------
+    |                                                                    |
+    |     excel Class                                                    |
+    |                                                                    |
+    |---------------------------------------------------------------------
+    |                                                                    |
+    |   1 - initial Class with excel name, sheet name and list of title  |
+    |                                                                    |
+    |   2 - create excel file and worksheet                              |
+    |                                                                    |
+    |   3 - close excel                                                  |
+    |                                                                    |
+    |   4 - store course data in excel row                               |
+    |                                                                    |
+    ----------------------------------------------------------------------
+
+    """
+    # ? -> 1
     def __init__(self, excelName, sheetName, coursePropTitleList):
 
         self.excelName = excelName
@@ -10,15 +32,14 @@ class ExcelClass:
 
         self.excelFile = xlsxwriter.Workbook(excelName)
         self.worksheet = self.excelFile.add_worksheet(sheetName)
-
-    # ? write excel title
+    # ? -> 2
     def initExcel(self):
         col = 0
         for title in self.coursePropTitleList:
 
             self.worksheet.write(0, col, title)
             col += 1
-
+    # ? -> 3
     def closeExcel(self):
         while True:
             try:
@@ -31,7 +52,7 @@ class ExcelClass:
                                 "Try to write file again? [Y/n]: " % e)
                 if decision != 'n':
                     continue
-
+    # ? -> 4
     def storeDataInExcel(self, row, col, course):
         try:
             worksheet = self.excelFile.get_worksheet_by_name(self.sheetName)

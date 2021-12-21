@@ -1,6 +1,22 @@
-# ? course class
 class CourseClass():
 
+    """
+
+    |------------------------------------------------------------------------------------
+    |                                                                                   |
+    |     course Class                                                                  |
+    |                                                                                   |
+    |------------------------------------------------------------------------------------
+    |                                                                                   |
+    |   1 - initial Class with name, teacher, institute, link, price, session and time  |
+    |                                                                                   |
+    |   2 - return class property as list                                               |
+    |                                                                                   |
+    -------------------------------------------------------------------------------------
+
+    """
+
+    # ? -> 1 
     def __init__(self, courseName, teacherName, instituteName, courseLink, coursePrice, courseSessionCountOrTime):
 
         self.courseName = courseName
@@ -10,6 +26,7 @@ class CourseClass():
         self.coursePrice = coursePrice
         self.courseSessionCountOrTime = courseSessionCountOrTime
 
+    # ? -> 2 
     def getCourseList(self):
         proplist = []
         proplist.append(self.courseName)
