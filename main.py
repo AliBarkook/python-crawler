@@ -1,25 +1,49 @@
-# ? request module for http request
+
+# ! modules:
+# ? improt request module for http request
 import requests
 from requests.exceptions import HTTPError
-
+# ? import thrading module
 import threading
-
-# ? Beautiful soup module for pars html
+# ? import time and speep module
+from time import time, sleep
+# ? import Beautiful soup module for pars html
 from bs4 import BeautifulSoup
 
-# ? course class
+
+# ! class:
+# ? import course class
 from classes.course import CourseClass
-# ? excel class
+# ? import excel class
 from classes.excel import ExcelClass
-# ? excel class
+# ? import environment class
 from environment.environment import EnvironmentClass
+
 
 
 # ? create instance from environment class
 env = EnvironmentClass()
-
 # ? create instance from ecxel class
-excel = ExcelClass('maktabkhooneh_' + env.studentNumber + '-3.xlsx', 'maktabkhoone_course_list', env.coursePropTitleList)
+excel = ExcelClass('excel/maktabkhooneh_' + env.studentNumber + '.xlsx', 'maktabkhoone_course_list', env.coursePropTitleList)
+
+# ? set interval to log active thread count every 1 second
+def interval():
+    previousThreadCount = 0
+    while True:
+        sleep(1 - time() % 1)
+        if threading.active_count() == 6 and previousThreadCount > 6:
+            if env.course_link_switch and env.course_info_switch:
+                env.course_link_switch = False
+                getCouresesInformation()
+            elif env.course_link_switch and not(env.course_info_switch):
+                break
+            else:
+                excel.closeExcel()
+                break
+                
+            
+        previousThreadCount = threading.active_count()
+        print('number of actice thread is: ' + str(threading.active_count()))
 
 class CourseThreadClass (threading.Thread):
    def __init__(self, row, link):
@@ -27,7 +51,6 @@ class CourseThreadClass (threading.Thread):
       self.row = row
       self.link = link
    def run(self):
-    #   print ("Starting thread number " + str(self.row))
       getCoursesInfo(self.link, int(self.row))
 
 class PageThreadClass (threading.Thread):
@@ -35,7 +58,6 @@ class PageThreadClass (threading.Thread):
       threading.Thread.__init__(self)
       self.pageNumber = pageNumber
    def run(self):
-    #   print ("Starting thread number " + str(self.row))
       getPageLink(self.pageNumber)
 
 # ? request to get courses info
@@ -74,7 +96,7 @@ def getCoursesInfo(link, index):
         return
 
 
-# ? read courses link and create thead; 
+# ? read courses link from text file; 
 def getCouresesInformation():
     couresLinkList = []
 
@@ -105,7 +127,7 @@ def getCouresesInformation():
         except:
             print ("Error: unable to start thread")
 
-    excel.closeExcel()
+    # excel.closeExcel()
    
 # ? request to get page and scrap link and write to text file
 def getPageLink(page):
@@ -178,12 +200,13 @@ def getTotalPage():
         print('Success!')
     
 
-
-# ? create excel file and woeksheet
+# ? create excel file and worksheet
 excel.initExcel()
 
 if env.course_link_switch:
     getTotalPage()
-
-if env.course_info_switch:
+elif env.course_info_switch:
     getCouresesInformation()
+
+
+interval()

@@ -23,6 +23,7 @@ class ExcelClass:
         while True:
             try:
                 self.excelFile.close()
+                print('excel file closed')
                 break
             except xlsxwriter.exceptions.FileCreateError as e:
                 decision = input("Exception caught in workbook.close(): %s\n"
@@ -33,7 +34,7 @@ class ExcelClass:
 
     def storeDataInExcel(self, row, col, course):
         try:
-            worksheet = self.excelFile.get_worksheet_by_name('maktabkhoone_course_list')
+            worksheet = self.excelFile.get_worksheet_by_name(self.sheetName)
             for prop in course.getCourseList():
                 worksheet.write(row, col, prop)
                 col += 1
