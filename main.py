@@ -21,14 +21,22 @@ env = EnvironmentClass()
 # ? create instance from ecxel class
 excel = ExcelClass('maktabkhooneh_' + env.studentNumber + '-3.xlsx', 'maktabkhoone_course_list', env.coursePropTitleList)
 
-class myThread (threading.Thread):
+class CourseThreadClass (threading.Thread):
    def __init__(self, row, link):
       threading.Thread.__init__(self)
       self.row = row
       self.link = link
    def run(self):
-      print ("Starting thread number " + str(self.row))
+    #   print ("Starting thread number " + str(self.row))
       getCoursesInfo(self.link, int(self.row))
+
+class PageThreadClass (threading.Thread):
+   def __init__(self, pageNumber):
+      threading.Thread.__init__(self)
+      self.pageNumber = pageNumber
+   def run(self):
+    #   print ("Starting thread number " + str(self.row))
+      getPageLink(self.pageNumber)
 
 # ? request to get courses info
 def getCoursesInfo(link, index):
@@ -75,17 +83,23 @@ def getCouresesInformation():
         for line in f:
             couresLinkList.append(line.strip())
     
+    print('total course link count is', len(couresLinkList))
+
     row = 1
 
     # ? loop over link
     for link in couresLinkList:
         row += 1
         try:
-            # ? create instanve form thread class and pass link and row to it
-            thread1 = myThread(row, link)
 
-            # ? start thread
-            thread1.start()
+            if env.multithead_switch:
+                # ? create instanve form thread class and pass link and row to it
+                thread1 = CourseThreadClass(row, link)
+
+                # ? start thread
+                thread1.start()
+            else:
+                getCoursesInfo(link, int(row))
 
         # ? catch error white create and start thread 
         except:
@@ -93,36 +107,49 @@ def getCouresesInformation():
 
     excel.closeExcel()
    
+# ? request to get page and scrap link and write to text file
+def getPageLink(page):
+    print('getting page number ' + str(page+1))
+
+    pageResponse = requests.get(env.courseListUrl + '/?p=' + str(page+1) + '&')
+    pageHtml = BeautifulSoup(pageResponse.content, 'html.parser')
+
+    # ? scrap links from DOM
+    allCourseLink = pageHtml.find_all('a', class_='course-card__wrapper')
+
+    # ? loop over links of page and puth to array and write to the text file
+    for link in allCourseLink:
+        link = env.siteUrl + link.get_attribute_list('href')[0]
+        with open('courses-link.txt', 'a') as f:
+            f.write(link + '\n')
+
 
 # ? loop over pages and get courses page link
 def loopOverPages(totalPage):
     print('getting coureses link ...')
-    couresLinkList = []
 
-    # ? make courses link text file empty
+    # ? make course link text file empty
     open('courses-link.txt', 'w').close()
 
     
     # ? loop over total page and get courses link
     for page in range(totalPage):
-        print('getting page number ' + str(page+1))
+        try:
 
-        pageResponse = requests.get(env.courseListUrl + '/?p=' + str(page+1) + '&')
-        pageHtml = BeautifulSoup(pageResponse.content, 'html.parser')
+            if env.multithead_switch:
+                # ? create instanve form thread class and pass link and row to it
+                thread1 = PageThreadClass(page)
 
-        # ? scrap links from DOM
-        allCourseLink = pageHtml.find_all('a', class_='course-card__wrapper')
+                # ? start thread
+                thread1.start()
 
-        # ? loop over links of page and puth to array and write to the text file
-        for link in allCourseLink:
-            link = env.siteUrl + link.get_attribute_list('href')[0]
-            couresLinkList.append(link)
-            with open('courses-link.txt', 'a') as f:
-                f.write(link + '\n')
+            else:
+                getPageLink(page)
 
+        # ? catch error white create and start thread 
+        except:
+            print ("Error: unable to start thread")
 
-    print('total course link count is', len(couresLinkList))
-    
 
 # ? request to site and store total course page
 def getTotalPage():
@@ -152,6 +179,7 @@ def getTotalPage():
     
 
 
+# ? create excel file and woeksheet
 excel.initExcel()
 
 if env.course_link_switch:
