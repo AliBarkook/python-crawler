@@ -32,8 +32,10 @@ class ExcelClass:
                     continue
 
     def storeDataInExcel(self, row, col, course):
-        worksheet = self.excelFile.get_worksheet_by_name('maktabkhoone_course_list')
-        for prop in course.getCourseList():
-            worksheet.write(row, col, prop)
-            col += 1
-        # closeExcel()
+        try:
+            worksheet = self.excelFile.get_worksheet_by_name('maktabkhoone_course_list')
+            for prop in course.getCourseList():
+                worksheet.write(row, col, prop)
+                col += 1
+        except:
+            print('can not write to excel file course number' + str(row))
