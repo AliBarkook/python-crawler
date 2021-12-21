@@ -154,7 +154,8 @@ def getTotalPage():
 
 excel.initExcel()
 
-if not(env.link_crawled_sitch):
+if env.course_link_switch:
     getTotalPage()
 
-getCouresesInformation()
+if env.course_info_switch:
+    getCouresesInformation()
